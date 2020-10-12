@@ -184,7 +184,7 @@ QGI <- function(df,
   legend(5, 400, legend=c("Best Fit", "Lower Match Quality", "Higher Match Quality"), col=c("blue","black", "black"), lty=c(1,NA, NA), pch=c(NA,1,1), cex=0.8, pt.cex=c(NA, 0.5, 1))
   lines(tDF$thresh_km, fitted(mean_mdl), col="blue")
   abline(h = 0, lty = 2)
-  
+  }
 
  
   #Overall impact 
