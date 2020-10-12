@@ -1,7 +1,9 @@
+library(foreach)
 library(doParallel)
 library(MatchIt)
 library(devtools)
 library(roxygen2)
+
 
 #' Plot Propensity Model
 #'
@@ -57,7 +59,7 @@ QGI <- function(df,
   #trials = seq(upperDistBound, lowerDistBound, (lowerDistBound-upperDistBound)/(density-1))
   trials = seq(lowerDistBound, upperDistBound, (upperDistBound-lowerDistBound)/(density-1))
   
-  mc <- foreach(i = 1:length(trials), .combine=rbind) %doParallel::dopar% {
+  mc <- foreach(i = 1:length(trials), .combine=rbind) %dopar% {
     set.seed(i)
     
     df$distanceTrue <- df$distance
