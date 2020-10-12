@@ -38,16 +38,18 @@ QGI <- function(df,
                 matchDiscardStrategy = "both",
                 pScoreReEstimate = TRUE,
                 minN = 10,
-                cores = "Default") {
+                cores = "Default") 
+  {
   
   if(cores == "Default")
-  {
-    cores=parallel::detectCores()
-  }
+    {
+      cores=parallel::detectCores()
+    }
 
-  if(omitNA == True){
-    df <- na.omit(df)
-  }
+  if(omitNA == True)
+    {
+      df <- na.omit(df)
+    }
 
   cl <- parallel::makeForkCluster(cores[1]-1) 
   doParallel::registerDoParallel(cl)
@@ -61,7 +63,8 @@ QGI <- function(df,
   #define sampling frame, with as much coverage as possible
   #given a defined density
   
-  if(density <= 1){
+  if(density <= 1)
+  {
     density = 2
     print("Sample Density set to minimum allowed (2)")
   }
@@ -71,55 +74,55 @@ QGI <- function(df,
   
   mc <- foreach(i = 1:length(trials), .combine=rbind) %dopar% {    
     
-    #Rename the distance column to avoid later confusion with p-score distances
-    df$geogDistance <- df[,distanceCol]
-    
-    #Set initial treatment value to 999 (representative of a null)
-    df$Treatment <- 999
-    
-    #Identify the distance threshold for this iteration
-    dist_thresh <- trials[i] 
+  #Rename the distance column to avoid later confusion with p-score distances
+  df$geogDistance <- df[,distanceCol]
+  
+  #Set initial treatment value to 999 (representative of a null)
+  df$Treatment <- 999
+  
+  #Identify the distance threshold for this iteration
+  dist_thresh <- trials[i] 
 
-    #Create a binary indicating if the location is considered "treated" this iteration
-    #Or control.
-    df$Treatment[df$geogDistance <= (0 + dist_thresh)] <- 1
-    df$Treatment[df$geogDistance >= (enforcedMinimumDistance + dist_thresh)] <- 0
-    
-    #Count the number of treatment and control cases for output.
-    df$Control = 0
-    df$Control[df$Treatment == 0] <- 1
+  #Create a binary indicating if the location is considered "treated" this iteration
+  #Or control.
+  df$Treatment[df$geogDistance <= (0 + dist_thresh)] <- 1
+  df$Treatment[df$geogDistance >= (enforcedMinimumDistance + dist_thresh)] <- 0
+  
+  #Count the number of treatment and control cases for output.
+  df$Control = 0
+  df$Control[df$Treatment == 0] <- 1
 
-    treatCount = sum(df$Treatment)
-    controlCount = sum(df$Control)
+  treatCount = sum(df$Treatment)
+  controlCount = sum(df$Control)
 
-    #Remove any cases that were not assigned to treatment or control
-    #Can happen if there are data errors (i.e., NAs in distance)
-    df <- df[!df$Treatment == 999,]
-    
-    #Remove the distance column in prep for propensity matching
-    df[, !(names(df) == "distance")]
-    
-    #Pscore variables
-    pVars <- c(controlVars,"Treatment")
+  #Remove any cases that were not assigned to treatment or control
+  #Can happen if there are data errors (i.e., NAs in distance)
+  df <- df[!df$Treatment == 999,]
+  
+  #Remove the distance column in prep for propensity matching
+  df[, !(names(df) == "distance")]
+  
+  #Pscore variables
+  pVars <- c(controlVars,"Treatment")
 
-    #Analysis variables
-    aVars <- c(controlVars,"Treatment","outcome")
+  #Analysis variables
+  aVars <- c(controlVars,"Treatment","outcome")
+  
+  #construct propensity score formula
+  f1 <- as.formula(paste("Treatment", paste(controlVars, collapse = " + "), sep = " ~ "))
+  
+  #Calculate our propensity scores using matchit
+  pscore.Calc <- matchit(f1, 
+                          data=df[pVars], 
+                          method=pScoreMethod, 
+                          distance=pScoreDistance,
+                          discard=matchDiscardStrategy,
+                          reestimate=pScoreReEstimate)
+  
+  matched.df <- match.data(pscore.Calc)
     
-    #construct propensity score formula
-    f1 <- as.formula(paste("Treatment", paste(controlVars, collapse = " + "), sep = " ~ "))
-    
-    #Calculate our propensity scores using matchit
-    pscore.Calc <- matchit(f1, 
-                           data=df[pVars], 
-                           method=pScoreMethod, 
-                           distance=pScoreDistance,
-                           discard=matchDiscardStrategy,
-                           reestimate=pScoreReEstimate)
-    
-    matched.df <- match.data(pscore.Calc)
-    
-    if(nrow(matched.df) > minN)
-    {
+  if(nrow(matched.df) > minN)
+  {
     #construct outcome modeling formula
     idx = as.numeric(rownames(matched.df))
     matched.df$outcome <- df[idx,][[outcomeVar]]
@@ -131,13 +134,8 @@ QGI <- function(df,
     match_diff = abs(summary(pscore.Calc)$sum.matched[[1]][1] - summary(pscore.Calc)$sum.matched[[2]][1])
     
     return( list(i, dist_thresh, trtModel$coef["Treatment"][[1]], nrow(df), match_diff, summary(trtModel)$r.squared, coef(summary(trtModel))[2,4], coef(summary(trtModel))[2,2], nrow(matched.df)))
-    }
-    else {
-       {
-         return(paste("Skipped due to lack of well-matched samples for distance band: ", dist_thresh))
-       }
-    }
-  }
+  } else {return(paste("Skipped due to lack of well-matched samples for distance band: ", dist_thresh))}
+}
 
 #   mc_df <- data.frame(t(matrix(unlist(mc), nrow=length(mc[1,]), byrow=T)))
 #   names(mc_df) <- c("ItId", "thresh", "coef", "obs", "match_diff", "R2", "TreatSig", "StdError", "SampleSize")
