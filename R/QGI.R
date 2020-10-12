@@ -141,6 +141,7 @@ QGI <- function(df,
 
   #Create visualizations and outputs
   tDF <- data.frame(t(matrix(unlist(mc), nrow=density, byrow=T)))
+  return(tDF)
   print(tDF)
   print(names(tDF))
   print(colnames(tDF))
