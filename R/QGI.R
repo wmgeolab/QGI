@@ -186,10 +186,8 @@ QGI <- function(df,
   legend(5, 400, legend=c("Best Fit", "Lower Match Quality", "Higher Match Quality"), col=c("blue","black", "black"), lty=c(1,NA, NA), pch=c(NA,1,1), cex=0.8, pt.cex=c(NA, 0.5, 1))
   lines(tDF$thresh, fitted(mean_mdl), col="blue")
   abline(h = 0, lty = 2)
-  }
 
- 
-  # #Overall impact 
+    # #Overall impact 
   print(mean(unlist(tDF[tDF$thresh >=2.66 & tDF$thresh <=6,]["coef"][1])))
   upper_std = preds[ ,3] + 1.96*preds_std[1:1000]
   print(mean(unlist(tDF[tDF$thresh >=min(newx[which(upper_std<0)]) & tDF$thresh <=max(newx[which(upper_std<0)]),]["coef"][1])))
@@ -198,6 +196,10 @@ QGI <- function(df,
   print(mean(unlist(tDF[tDF$thresh >=min(newx[which(lower_std>0)]) & tDF$thresh <=max(newx[which(lower_std>0)]),]["coef"][1])))
   print(paste('significant distance intervel: ',min(newx[which(lower_std>0)]),max(newx[which(lower_std>0)])))
   print(paste('plotted distance range: ',min(tDF$thresh),' ',max(tDF$thresh)))
+  }
+
+ 
+
   return(makeVisualization(tDF))
 
 }
