@@ -36,6 +36,7 @@ QGI <- function(df,
                 matchDiscardStrategy = "both",
                 pScoreReEstimate = TRUE,
                 minN = 10,
+                matchQualityWeighting = TRUE,
                 cores = "Default") 
   {
   
@@ -136,93 +137,83 @@ QGI <- function(df,
 
   }
 
-#Create visualizations and outputs
+  #Create visualizations and outputs
   tDF <- data.frame(t(matrix(unlist(mc), nrow=length(mc[1,]), byrow=T)))
   names(tDF) <- c("ItId", "thresh", "coef", "obs", "match_diff", "R2", "TreatSig", "StdError", "ItSampleSize", "ItTreatmentCount", "ItControlCount")
 
-return("Test")
+  #Scale for data visualization and (optionally) weighting
+  tDF$matchWeight = 1 - ((tDF$match_diff - min(tDF$match_diff)) / (max(tDF$match_diff) - min(tDF$match_diff)))
 
+  #Third-order polynomial for the distance-decay
+  tDF$b = tDF$thresh_km**2
+  tDF$c = tDF$thresh_km**3
+  tDF$d = tDF$thresh_km**4
+  
+  tDF <- tDF[order(tDF$thresh_km),]
 
+  if(matchQualityWeighting == TRUE)
+  {
+    mean_mdl = lm(coef ~ thresh_km + b + c, data = tDF, weights =matchWeight)
+    std_mdl = lm(StdError ~ thresh_km + b + c, data = tDF, weights =matchWeight)
+  } else {
+    mean_mdl = lm(coef ~ thresh_km + b + c, data = tDF)
+    std_mdl = lm(StdError ~ thresh_km + b + c, data = tDF)
+  }
+
+  makeVisualization <- function (tDF){
+  par(mfrow = c(1, 1),     # 2x2 layout
+    oma = c(2, 2, 0, 0), # two rows of text at the outer left and bottom margin
+    mar = c(3, 3, 0, 0), # space for one row of text at ticks and to separate plots
+    mgp = c(2, 1, 0),    # axis label at 2 rows distance, tick labels at 1 row
+    xpd = FALSE)   
+  ylim_upper <- max(tDF$coef + 1.96*tDF$StdError, na.rm = TRUE)
+  ylim_lower <- min(tDF$coef - 1.96*tDF$StdError, na.rm = TRUE)
+  plot(tDF$thresh_km, tDF$coef, cex = tDF$size, xlab="Distance (km)", ylab=outcomeVar, ylim=c(min(0,ylim_lower), max(ylim_upper,0)))
+
+  newx <- seq(min(tDF$thresh_km), max(tDF$thresh_km), length.out=1000)
+
+  preds <- predict(mean_mdl, newdata=data.frame(thresh_km=newx, b=newx**2, c=newx**3), interval='confidence')
+  preds_std <- predict(std_mdl, newdata=data.frame(thresh_km=newx, b=newx**2, c=newx**3), interval='confidence')
+  polygon(c(rev(newx), newx), c(rev( preds[ ,3] + 1.96*preds_std[1:1000]),preds[ ,2] - 1.96*preds_std[1:1000]), col=rgb(0.2, 0.2, 0.25,0.25), border = NA)
+  
+  #polygon(c(rev(newx), newx), c(rev(preds[ ,3]), preds[ ,2]), col=rgb(0, 1, 0,0.25), border = NA)
+  lines(newx, preds[ ,3] + 1.96*preds_std[1:1000], lty = 'dashed', col = 'black')
+  lines(newx, preds[ ,2] - 1.96*preds_std[1:1000], lty = 'dashed', col = 'black')
+  lines(newx, preds[ ,3], lty = 'dashed', col = 'yellow')
+  lines(newx, preds[ ,2], lty = 'dashed', col = 'yellow')
+  legend(5, 400, legend=c("Best Fit", "Lower Match Quality", "Higher Match Quality"), col=c("blue","black", "black"), lty=c(1,NA, NA), pch=c(NA,1,1), cex=0.8, pt.cex=c(NA, 0.5, 1))
+  lines(tDF$thresh_km, fitted(mean_mdl), col="blue")
+  abline(h = 0, lty = 2)
+  
+
+  }
+  #Overall impact 
+  print(mean(unlist(tDF[tDF$thresh_km >=2.66 & tDF$thresh_km <=6,]["coef"][1])))
+  upper_std = preds[ ,3] + 1.96*preds_std[1:1000]
+  print(mean(unlist(tDF[tDF$thresh_km >=min(newx[which(upper_std<0)]) & tDF$thresh_km <=max(newx[which(upper_std<0)]),]["coef"][1])))
+  print(paste('significant distance intervel: ',min(newx[which(upper_std<0)]),max(newx[which(upper_std<0)])))
+  lower_std = preds[ ,2] - 1.96*preds_std[1:1000]
+  print(mean(unlist(tDF[tDF$thresh_km >=min(newx[which(lower_std>0)]) & tDF$thresh_km <=max(newx[which(lower_std>0)]),]["coef"][1])))
+  print(paste('significant distance intervel: ',min(newx[which(lower_std>0)]),max(newx[which(lower_std>0)])))
+  print(paste('plotted distance range: ',min(tDF$thresh_km),' ',max(tDF$thresh_km)))
+  return(makeVisualization(tDF))
 
 }
 
+    
 
-
   
-#   #Drop cases where not enough data was available to conduct the matches
-#   #according to the user set parameter
-#   tDF <- tDF[!tDF["thresh"] == 1,]
-  
-#   #Drop cases with a really,really high match_diff
-#   #Generally indicates no decent matches were made in matching
-#   tDF <- tDF[!tDF["match_diff"] > maximum_match_diff,]
-  
-#   #Good (Runs with above-average matches, for now):
-#   #Ignore this I think:
-#   #good_matches <- tDF[!tDF$match_diff > mean(tDF$match_diff),]
-  
-  
-#   #Scale for viz and weighting
-#   tDF$matchQual_scale = 1 - ((tDF$match_diff - min(tDF$match_diff)) / (max(tDF$match_diff) - min(tDF$match_diff)))
-  
-#   tDF$size = (tDF$matchQual_scale) # + tDF$sampleSize_scale) / 2
-  
-#   #Change Threshold from Degrees to KM for interpretation
-#   tDF$thresh_km = tDF$thresh * 110.567
-#   #tDF$thresh_km = tDF$thresh*0.001
-  
-#   tDF$b = tDF$thresh_km**2
-#   tDF$c = tDF$thresh_km**3
-#   tDF$d = tDF$thresh_km**4
-  
-#   tDF <- tDF[order(tDF$thresh_km),]
-  
-#   #Weighted function based on match quality
-#   mean_mdl = lm(coef ~ thresh_km + b + c, data = tDF, weights =size)
-#   std_mdl = lm(StdError ~ thresh_km + b + c, data = tDF, weights =size)
-#   #mean_mdl = lm(coef ~ thresh_km + b + c, data = tDF)
-#   #std_mdl = lm(StdError ~ thresh_km + b + c, data = tDF)
  
-#   par(mfrow = c(1, 1),     # 2x2 layout
-#     oma = c(2, 2, 0, 0), # two rows of text at the outer left and bottom margin
-#     mar = c(3, 3, 0, 0), # space for one row of text at ticks and to separate plots
-#     mgp = c(2, 1, 0),    # axis label at 2 rows distance, tick labels at 1 row
-#     xpd = FALSE)        
+     
   
-#   ylim_upper <- max(tDF$coef + 1.96*tDF$StdError, na.rm = TRUE)
-#   ylim_lower <- min(tDF$coef - 1.96*tDF$StdError, na.rm = TRUE)
-#   plot(tDF$thresh_km, tDF$coef, cex = tDF$size, xlab="Distance (km)", ylab=outcome_label, ylim=c(min(0,ylim_lower), max(ylim_upper,0)))
-#   #plot(tDF$thresh_km, tDF$coef, cex = tDF$size, xlab="Distance (km)", ylab=outcome_label, ylim=c(-0.5,0.5))
+
+  #plot(tDF$thresh_km, tDF$coef, cex = tDF$size, xlab="Distance (km)", ylab=outcome_label, ylim=c(-0.5,0.5))
   
-#   newx <- seq(min(tDF$thresh_km), max(tDF$thresh_km), length.out=1000)
   
-#   if (task == 'fao'){
-#     newx <- rev(newx)
-#   }
   
-#   preds <- predict(mean_mdl, newdata=data.frame(thresh_km=newx, b=newx**2, c=newx**3), interval='confidence')
-#   preds_std <- predict(std_mdl, newdata=data.frame(thresh_km=newx, b=newx**2, c=newx**3), interval='confidence')
-#   polygon(c(rev(newx), newx), c(rev( preds[ ,3] + 1.96*preds_std[1:1000]),preds[ ,2] - 1.96*preds_std[1:1000]), col=rgb(0.2, 0.2, 0.25,0.25), border = NA)
+
   
-#   #polygon(c(rev(newx), newx), c(rev(preds[ ,3]), preds[ ,2]), col=rgb(0, 1, 0,0.25), border = NA)
-#   lines(newx, preds[ ,3] + 1.96*preds_std[1:1000], lty = 'dashed', col = 'black')
-#   lines(newx, preds[ ,2] - 1.96*preds_std[1:1000], lty = 'dashed', col = 'black')
-#   lines(newx, preds[ ,3], lty = 'dashed', col = 'yellow')
-#   lines(newx, preds[ ,2], lty = 'dashed', col = 'yellow')
-#   legend(5, 400, legend=c("Weighted Best Fit", "Lower Match Quality", "Higher Match Quality"), col=c("blue","black", "black"), lty=c(1,NA, NA), pch=c(NA,1,1), cex=0.8, pt.cex=c(NA, 0.5, 1))
-#   lines(tDF$thresh_km, fitted(mean_mdl), col="blue")
-#   abline(h = 0, lty = 2)
   
-#   #Overall impact 
-#   print(mean(unlist(tDF[tDF$thresh_km >=2.66 & tDF$thresh_km <=6,]["coef"][1])))
-#   upper_std = preds[ ,3] + 1.96*preds_std[1:1000]
-#   print(mean(unlist(tDF[tDF$thresh_km >=min(newx[which(upper_std<0)]) & tDF$thresh_km <=max(newx[which(upper_std<0)]),]["coef"][1])))
-#   print(paste('significant distance intervel: ',min(newx[which(upper_std<0)]),max(newx[which(upper_std<0)])))
-#   lower_std = preds[ ,2] - 1.96*preds_std[1:1000]
-#   print(mean(unlist(tDF[tDF$thresh_km >=min(newx[which(lower_std>0)]) & tDF$thresh_km <=max(newx[which(lower_std>0)]),]["coef"][1])))
-#   print(paste('significant distance intervel: ',min(newx[which(lower_std>0)]),max(newx[which(lower_std>0)])))
-#   print(paste('plotted distance range: ',min(tDF$thresh_km),' ',max(tDF$thresh_km)))
   
-#   return(c(tDF, min(newx[which(lower_std>0)]),max(newx[which(lower_std>0)])))
+  return(c(tDF, min(newx[which(lower_std>0)]),max(newx[which(lower_std>0)])))
   
-# }
