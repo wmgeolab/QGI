@@ -186,7 +186,7 @@ QGI <- function(df,
   abline(h = 0, lty = 2)
   
 
-  }
+ 
   #Overall impact 
   print(mean(unlist(tDF[tDF$thresh_km >=2.66 & tDF$thresh_km <=6,]["coef"][1])))
   upper_std = preds[ ,3] + 1.96*preds_std[1:1000]
