@@ -30,7 +30,7 @@ QGI <- function(df,
                 upperDistBound="Default", 
                 maximum_match_diff=0.9, 
                 enforcedMinimumDistance=5,
-                omitNA = TRUE,
+                strategyNA = "Omit",
                 pScoreMethod = "linear",
                 pScoreDistance = "logit",
                 matchDiscardStrategy = "both",
@@ -44,7 +44,7 @@ QGI <- function(df,
       cores=parallel::detectCores()
     }
 
-  if(omitNA == TRUE)
+  if(strategyNA == "Omit")
     {
       df <- na.omit(df)
     }
@@ -131,51 +131,57 @@ QGI <- function(df,
     
     match_diff = abs(summary(pscore.Calc)$sum.matched[[1]][1] - summary(pscore.Calc)$sum.matched[[2]][1])
     
-    return( list(i, dist_thresh, trtModel$coef["Treatment"][[1]], nrow(df), match_diff, summary(trtModel)$r.squared, coef(summary(trtModel))[2,4], coef(summary(trtModel))[2,2], nrow(matched.df)))
-  } else {
-    return(paste("Skipped due to lack of well-matched samples for distance band: ", dist_thresh))
-    }
+    return( list(i, dist_thresh, trtModel$coef["Treatment"][[1]], nrow(df), match_diff, summary(trtModel)$r.squared, coef(summary(trtModel))[2,4], coef(summary(trtModel))[2,2], nrow(matched.df), treatCount, controlCount))
+  } 
 
   }
-  }
+
+#Create visualizations and outputs
+  tDF <- data.frame(t(matrix(unlist(mc), nrow=length(mc[1,]), byrow=T)))
+  names(tDF) <- c("ItId", "thresh", "coef", "obs", "match_diff", "R2", "TreatSig", "StdError", "ItSampleSize", "ItTreatmentCount", "ItControlCount")
+
+return("Test")
 
 
-#   mc_df <- data.frame(t(matrix(unlist(mc), nrow=length(mc[1,]), byrow=T)))
-#   names(mc_df) <- c("ItId", "thresh", "coef", "obs", "match_diff", "R2", "TreatSig", "StdError", "SampleSize")
+
+}
+
+
+
   
 #   #Drop cases where not enough data was available to conduct the matches
 #   #according to the user set parameter
-#   mc_df <- mc_df[!mc_df["thresh"] == 1,]
+#   tDF <- tDF[!tDF["thresh"] == 1,]
   
 #   #Drop cases with a really,really high match_diff
 #   #Generally indicates no decent matches were made in matching
-#   mc_df <- mc_df[!mc_df["match_diff"] > maximum_match_diff,]
+#   tDF <- tDF[!tDF["match_diff"] > maximum_match_diff,]
   
 #   #Good (Runs with above-average matches, for now):
 #   #Ignore this I think:
-#   #good_matches <- mc_df[!mc_df$match_diff > mean(mc_df$match_diff),]
+#   #good_matches <- tDF[!tDF$match_diff > mean(tDF$match_diff),]
   
   
 #   #Scale for viz and weighting
-#   mc_df$matchQual_scale = 1 - ((mc_df$match_diff - min(mc_df$match_diff)) / (max(mc_df$match_diff) - min(mc_df$match_diff)))
+#   tDF$matchQual_scale = 1 - ((tDF$match_diff - min(tDF$match_diff)) / (max(tDF$match_diff) - min(tDF$match_diff)))
   
-#   mc_df$size = (mc_df$matchQual_scale) # + mc_df$sampleSize_scale) / 2
+#   tDF$size = (tDF$matchQual_scale) # + tDF$sampleSize_scale) / 2
   
 #   #Change Threshold from Degrees to KM for interpretation
-#   mc_df$thresh_km = mc_df$thresh * 110.567
-#   #mc_df$thresh_km = mc_df$thresh*0.001
+#   tDF$thresh_km = tDF$thresh * 110.567
+#   #tDF$thresh_km = tDF$thresh*0.001
   
-#   mc_df$b = mc_df$thresh_km**2
-#   mc_df$c = mc_df$thresh_km**3
-#   mc_df$d = mc_df$thresh_km**4
+#   tDF$b = tDF$thresh_km**2
+#   tDF$c = tDF$thresh_km**3
+#   tDF$d = tDF$thresh_km**4
   
-#   mc_df <- mc_df[order(mc_df$thresh_km),]
+#   tDF <- tDF[order(tDF$thresh_km),]
   
 #   #Weighted function based on match quality
-#   mean_mdl = lm(coef ~ thresh_km + b + c, data = mc_df, weights =size)
-#   std_mdl = lm(StdError ~ thresh_km + b + c, data = mc_df, weights =size)
-#   #mean_mdl = lm(coef ~ thresh_km + b + c, data = mc_df)
-#   #std_mdl = lm(StdError ~ thresh_km + b + c, data = mc_df)
+#   mean_mdl = lm(coef ~ thresh_km + b + c, data = tDF, weights =size)
+#   std_mdl = lm(StdError ~ thresh_km + b + c, data = tDF, weights =size)
+#   #mean_mdl = lm(coef ~ thresh_km + b + c, data = tDF)
+#   #std_mdl = lm(StdError ~ thresh_km + b + c, data = tDF)
  
 #   par(mfrow = c(1, 1),     # 2x2 layout
 #     oma = c(2, 2, 0, 0), # two rows of text at the outer left and bottom margin
@@ -183,12 +189,12 @@ QGI <- function(df,
 #     mgp = c(2, 1, 0),    # axis label at 2 rows distance, tick labels at 1 row
 #     xpd = FALSE)        
   
-#   ylim_upper <- max(mc_df$coef + 1.96*mc_df$StdError, na.rm = TRUE)
-#   ylim_lower <- min(mc_df$coef - 1.96*mc_df$StdError, na.rm = TRUE)
-#   plot(mc_df$thresh_km, mc_df$coef, cex = mc_df$size, xlab="Distance (km)", ylab=outcome_label, ylim=c(min(0,ylim_lower), max(ylim_upper,0)))
-#   #plot(mc_df$thresh_km, mc_df$coef, cex = mc_df$size, xlab="Distance (km)", ylab=outcome_label, ylim=c(-0.5,0.5))
+#   ylim_upper <- max(tDF$coef + 1.96*tDF$StdError, na.rm = TRUE)
+#   ylim_lower <- min(tDF$coef - 1.96*tDF$StdError, na.rm = TRUE)
+#   plot(tDF$thresh_km, tDF$coef, cex = tDF$size, xlab="Distance (km)", ylab=outcome_label, ylim=c(min(0,ylim_lower), max(ylim_upper,0)))
+#   #plot(tDF$thresh_km, tDF$coef, cex = tDF$size, xlab="Distance (km)", ylab=outcome_label, ylim=c(-0.5,0.5))
   
-#   newx <- seq(min(mc_df$thresh_km), max(mc_df$thresh_km), length.out=1000)
+#   newx <- seq(min(tDF$thresh_km), max(tDF$thresh_km), length.out=1000)
   
 #   if (task == 'fao'){
 #     newx <- rev(newx)
@@ -204,19 +210,19 @@ QGI <- function(df,
 #   lines(newx, preds[ ,3], lty = 'dashed', col = 'yellow')
 #   lines(newx, preds[ ,2], lty = 'dashed', col = 'yellow')
 #   legend(5, 400, legend=c("Weighted Best Fit", "Lower Match Quality", "Higher Match Quality"), col=c("blue","black", "black"), lty=c(1,NA, NA), pch=c(NA,1,1), cex=0.8, pt.cex=c(NA, 0.5, 1))
-#   lines(mc_df$thresh_km, fitted(mean_mdl), col="blue")
+#   lines(tDF$thresh_km, fitted(mean_mdl), col="blue")
 #   abline(h = 0, lty = 2)
   
 #   #Overall impact 
-#   print(mean(unlist(mc_df[mc_df$thresh_km >=2.66 & mc_df$thresh_km <=6,]["coef"][1])))
+#   print(mean(unlist(tDF[tDF$thresh_km >=2.66 & tDF$thresh_km <=6,]["coef"][1])))
 #   upper_std = preds[ ,3] + 1.96*preds_std[1:1000]
-#   print(mean(unlist(mc_df[mc_df$thresh_km >=min(newx[which(upper_std<0)]) & mc_df$thresh_km <=max(newx[which(upper_std<0)]),]["coef"][1])))
+#   print(mean(unlist(tDF[tDF$thresh_km >=min(newx[which(upper_std<0)]) & tDF$thresh_km <=max(newx[which(upper_std<0)]),]["coef"][1])))
 #   print(paste('significant distance intervel: ',min(newx[which(upper_std<0)]),max(newx[which(upper_std<0)])))
 #   lower_std = preds[ ,2] - 1.96*preds_std[1:1000]
-#   print(mean(unlist(mc_df[mc_df$thresh_km >=min(newx[which(lower_std>0)]) & mc_df$thresh_km <=max(newx[which(lower_std>0)]),]["coef"][1])))
+#   print(mean(unlist(tDF[tDF$thresh_km >=min(newx[which(lower_std>0)]) & tDF$thresh_km <=max(newx[which(lower_std>0)]),]["coef"][1])))
 #   print(paste('significant distance intervel: ',min(newx[which(lower_std>0)]),max(newx[which(lower_std>0)])))
-#   print(paste('plotted distance range: ',min(mc_df$thresh_km),' ',max(mc_df$thresh_km)))
+#   print(paste('plotted distance range: ',min(tDF$thresh_km),' ',max(tDF$thresh_km)))
   
-#   return(c(mc_df, min(newx[which(lower_std>0)]),max(newx[which(lower_std>0)])))
+#   return(c(tDF, min(newx[which(lower_std>0)]),max(newx[which(lower_std>0)])))
   
 # }
