@@ -57,7 +57,7 @@ QGI <- function(df,
   #trials = seq(upperDistBound, lowerDistBound, (lowerDistBound-upperDistBound)/(density-1))
   trials = seq(lowerDistBound, upperDistBound, (upperDistBound-lowerDistBound)/(density-1))
   
-  mc <- foreach(i = 1:length(trials), .combine=rbind) %dopar% {
+  mc <- foreach(i = 1:length(trials), .combine=rbind) %doParallel::dopar% {
     set.seed(i)
     
     df$distanceTrue <- df$distance
