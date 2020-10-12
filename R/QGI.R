@@ -142,7 +142,7 @@ QGI <- function(df,
   #Create visualizations and outputs
   tDF <- data.frame(t(matrix(unlist(mc), nrow=density, byrow=T)))
   print(names(tDF))
-  names(tDF) <- c("ItId", "thresh", "coef", "obs", "match_diff", "R2", "TreatSig", "StdError", "ItSampleSize", "ItTreatmentCount", "ItControlCount")
+  colnames(tDF) <- c("ItId", "thresh", "coef", "obs", "match_diff", "R2", "TreatSig", "StdError", "ItSampleSize", "ItTreatmentCount", "ItControlCount")
 
   #Scale for data visualization and (optionally) weighting
   tDF$matchWeight = 1 - ((tDF$match_diff - min(tDF$match_diff)) / (max(tDF$match_diff) - min(tDF$match_diff)))
