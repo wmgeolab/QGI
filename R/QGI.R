@@ -141,6 +141,7 @@ QGI <- function(df,
 
   #Create visualizations and outputs
   tDF <- data.frame(t(matrix(unlist(mc), nrow=density, byrow=T)))
+  print(tDF)
   print(names(tDF))
   print(colnames(tDF))
   colnames(tDF) <- c("ItId", "thresh", "coef", "obs", "match_diff", "R2", "TreatSig", "StdError", "ItSampleSize", "ItTreatmentCount", "ItControlCount")
