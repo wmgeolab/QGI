@@ -22,7 +22,7 @@ library(roxygen2)
 #' QGI(read.csv("../df.csv"), independent_vars, x,x,x, 30*16)
 
 QGI <- function(df, 
-                distanceCol = "distance"
+                distanceCol = "distance",
                 controlVars, 
                 outcomeVar = "outcome", 
                 density = 50, 
