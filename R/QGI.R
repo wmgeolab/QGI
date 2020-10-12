@@ -44,7 +44,7 @@ QGI <- function(df,
       cores=parallel::detectCores()
     }
 
-  if(omitNA == True)
+  if(omitNA == TRUE)
     {
       df <- na.omit(df)
     }
