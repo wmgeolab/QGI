@@ -20,7 +20,7 @@ library(roxygen2)
 
 #Allow user to change the name of the distance column.  Right now it is hard coded as "Distance".
 
-plotPropensityModel <- function(rDF, 
+QGI <- function(rDF, 
                                 controlVars, 
                                 outcome_var, 
                                 outcome_label, 
