@@ -137,8 +137,10 @@ QGI <- function(df,
 
   }
 
+  print(mc)
+
   #Create visualizations and outputs
-  tDF <- data.frame(t(matrix(unlist(mc), nrow=length(mc[1,]), byrow=T)))
+  tDF <- data.frame(t(matrix(unlist(mc), nrow=density, byrow=T)))
   names(tDF) <- c("ItId", "thresh", "coef", "obs", "match_diff", "R2", "TreatSig", "StdError", "ItSampleSize", "ItTreatmentCount", "ItControlCount")
 
   #Scale for data visualization and (optionally) weighting
