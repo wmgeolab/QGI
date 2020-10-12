@@ -200,20 +200,6 @@ QGI <- function(df,
 
 }
 
-    
-
-  
- 
-     
-  
-
   #plot(tDF$thresh_km, tDF$coef, cex = tDF$size, xlab="Distance (km)", ylab=outcome_label, ylim=c(-0.5,0.5))
-  
-  
-  
-
-  
-  
-  
-  return(c(tDF, min(newx[which(lower_std>0)]),max(newx[which(lower_std>0)])))
+  #return(c(tDF, min(newx[which(lower_std>0)]),max(newx[which(lower_std>0)])))
   
