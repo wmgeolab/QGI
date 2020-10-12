@@ -2,8 +2,6 @@ library(foreach)
 library(doParallel)
 library(MatchIt)
 library(devtools)
-library(roxygen2)
-
 
 #' Plot Propensity Model
 #'
@@ -55,19 +53,19 @@ QGI <- function(df,
   doParallel::registerDoParallel(cl)
 
   if(upperDistBound == "Default")
-  {
+    {
     upperDistBound = as.numeric(summary(df[,distanceCol])[3])
-  }
+    }
   
   mc = 0
   #define sampling frame, with as much coverage as possible
   #given a defined density
   
   if(density <= 1)
-  {
+    {
     density = 2
     print("Sample Density set to minimum allowed (2)")
-  }
+    }
 
   #trials = seq(upperDistBound, lowerDistBound, (lowerDistBound-upperDistBound)/(density-1))
   trials = seq(lowerDistBound, upperDistBound, (upperDistBound-lowerDistBound)/(density-1))
@@ -134,8 +132,13 @@ QGI <- function(df,
     match_diff = abs(summary(pscore.Calc)$sum.matched[[1]][1] - summary(pscore.Calc)$sum.matched[[2]][1])
     
     return( list(i, dist_thresh, trtModel$coef["Treatment"][[1]], nrow(df), match_diff, summary(trtModel)$r.squared, coef(summary(trtModel))[2,4], coef(summary(trtModel))[2,2], nrow(matched.df)))
-  } else {return(paste("Skipped due to lack of well-matched samples for distance band: ", dist_thresh))}
-}
+  } else {
+    return(paste("Skipped due to lack of well-matched samples for distance band: ", dist_thresh))
+    }
+
+  }
+  }
+
 
 #   mc_df <- data.frame(t(matrix(unlist(mc), nrow=length(mc[1,]), byrow=T)))
 #   names(mc_df) <- c("ItId", "thresh", "coef", "obs", "match_diff", "R2", "TreatSig", "StdError", "SampleSize")
