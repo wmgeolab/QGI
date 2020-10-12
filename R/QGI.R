@@ -37,7 +37,7 @@ QGI <- function(df,
     cores=parallel::detectCores()
   }
 
-  cl <- makeForkCluster(cores[1]-1) 
+  cl <- parallel::makeForkCluster(cores[1]-1) 
   registerDoParallel(cl)
 
   if(upperDistBound == "Default")
