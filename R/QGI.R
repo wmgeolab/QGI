@@ -210,7 +210,7 @@ dev.off()
 #================= End Viz
 
 
-  retClass = list(figure = makeVisualization(tDF, preds, preds_std, newx, mean_mdl), 
+  retClass = list(figure = figFile), 
                   distanceModels = tDF)
   class(retClass) <- c("figure", 
                        "distanceModels")
