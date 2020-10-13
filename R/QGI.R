@@ -153,7 +153,7 @@ if(verbosity == 1)
     idx = as.numeric(rownames(matched.df))
     matched.df$outcome <- df[idx,][[outcomeVar]]
     f2 <- as.formula(paste("outcome", paste(c("Treatment", controlVars), collapse = " + "), sep = " ~ "))
-    
+    matched.df["Treatment"] = matched.df$Treatment
     trtModel <- lm(f2, data=matched.df[aVars])
     
     if(verbosity == 1)
