@@ -37,7 +37,7 @@ QGI <- function(df,
                 pScoreReEstimate = TRUE,
                 minN = 10,
                 matchQualityWeighting = TRUE,
-                figFile = "Default"
+                figFile = "Default",
                 cores = "Default") 
   {
   
