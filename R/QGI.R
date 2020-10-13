@@ -136,7 +136,11 @@ if(enforcedMinimumDistance <= 0.1)
                           discard=matchDiscardStrategy,
                           reestimate=pScoreReEstimate)
   
+  return(pscoreCalc)
+
   matched.df <- match.data(pscoreCalc)
+
+  
   
 if(verbosity == 1)
 {
@@ -152,6 +156,9 @@ if(verbosity == 1)
     #construct outcome modeling formula
     idx = as.numeric(rownames(matched.df))
     matched.df$outcome <- df[idx,][[outcomeVar]]
+
+    
+
     f2 <- as.formula(paste("outcome", paste(c("Treatment", controlVars), collapse = " + "), sep = " ~ "))
     matched.df["Treatment"] = matched.df$Treatment
     trtModel <- lm(f2, data=matched.df[aVars])
@@ -161,16 +168,14 @@ if(verbosity == 1)
       print(trtModel$coef)
     }
     match_diff = abs(summary(pscoreCalc)$sum.matched[[1]][1] - summary(pscoreCalc)$sum.matched[[2]][1])
-    
-    return(matched.df[aVars])
 
-    #return( list(i, dist_thresh, trtModel$coef["Treatment"][[1]], nrow(df), match_diff, summary(trtModel)$r.squared, coef(summary(trtModel))[2,4], coef(summary(trtModel))[2,2], nrow(matched.df), treatCount, controlCount))
+    return( list(i, dist_thresh, trtModel$coef["Treatment"][[1]], nrow(df), match_diff, summary(trtModel)$r.squared, coef(summary(trtModel))[2,4], coef(summary(trtModel))[2,2], nrow(matched.df), treatCount, controlCount))
     
   } 
 
   }
 
-  return(mc)
+  #return(mc)
 
   #Create visualizations and outputs
   tDF <- data.frame(t(matrix(unlist(mc), nrow=11, byrow=T)))
