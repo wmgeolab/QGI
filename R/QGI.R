@@ -39,7 +39,7 @@ QGI <- function(df,
                 matchQualityWeighting = TRUE,
                 figFile = "Default",
                 verbosity = 0,
-                logFile = ""
+                logFile = "",
                 cores = "Default") 
   {
   
