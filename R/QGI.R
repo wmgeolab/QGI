@@ -210,7 +210,7 @@ dev.off()
 #================= End Viz
 
 
-  retClass = list(figure = figFile), 
+  retClass = list(figure = figFile, 
                   distanceModels = tDF)
   class(retClass) <- c("figure", 
                        "distanceModels")
