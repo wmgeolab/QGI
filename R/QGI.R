@@ -60,10 +60,6 @@ if(enforcedMinimumDistance <= 0.1)
   print("WARNING: Small enforced minimum distance values can result in duplicate cases in treatment and control sets, depending on the resolution of your data.  Use with extreme caution.")
 }  
 
-if(verbosity == 1)
-{
-  print(df)
-}
   if(upperDistBound == "Default")
     {
     upperDistBound = as.numeric(summary(df[,distanceCol])[3])
