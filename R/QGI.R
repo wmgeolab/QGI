@@ -153,8 +153,12 @@ if(verbosity == 1)
 
   if(nrow(matched.df) > minN)
   {
-
-    df$outcome <- df[outcomeVar]
+    if(verbosity == 1)
+    {
+      print(outcomeVar)
+      print(nrow(df["outcomeVar"]))
+    }
+    df["outcome"] <- df[outcomeVar]
     f2 <- as.formula(paste("outcome", paste(c("Treatment", controlVars), collapse = " + "), sep = " ~ "))
 
     trtModel <- lm(f2, data=df[aVars])
