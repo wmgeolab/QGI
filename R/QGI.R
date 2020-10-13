@@ -162,7 +162,7 @@ QGI <- function(df,
     std_mdl = lm(StdError ~ thresh + b + c, data = tDF)
   }
 
-  makeVisualization <- function (tDF){
+  makeVisualization <- function (tDF, preds, preds_std, newx, mean_mdl){
   par(mfrow = c(1, 1),     # 2x2 layout
     oma = c(2, 2, 0, 0), # two rows of text at the outer left and bottom margin
     mar = c(3, 3, 0, 0), # space for one row of text at ticks and to separate plots
@@ -172,10 +172,7 @@ QGI <- function(df,
   ylim_lower <- min(tDF$coef - 1.96*tDF$StdError, na.rm = TRUE)
   plot(tDF$thresh, tDF$coef, cex = tDF$size, xlab="Distance (km)", ylab=outcomeVar, ylim=c(min(0,ylim_lower), max(ylim_upper,0)))
 
-  newx <- seq(min(tDF$thresh), max(tDF$thresh), length.out=1000)
 
-  preds <- predict(mean_mdl, newdata=data.frame(thresh=newx, b=newx**2, c=newx**3), interval='confidence')
-  preds_std <- predict(std_mdl, newdata=data.frame(thresh=newx, b=newx**2, c=newx**3), interval='confidence')
   polygon(c(rev(newx), newx), c(rev( preds[ ,3] + 1.96*preds_std[1:1000]),preds[ ,2] - 1.96*preds_std[1:1000]), col=rgb(0.2, 0.2, 0.25,0.25), border = NA)
   
   #polygon(c(rev(newx), newx), c(rev(preds[ ,3]), preds[ ,2]), col=rgb(0, 1, 0,0.25), border = NA)
@@ -183,10 +180,24 @@ QGI <- function(df,
   lines(newx, preds[ ,2] - 1.96*preds_std[1:1000], lty = 'dashed', col = 'black')
   lines(newx, preds[ ,3], lty = 'dashed', col = 'yellow')
   lines(newx, preds[ ,2], lty = 'dashed', col = 'yellow')
-  legend(5, 400, legend=c("Best Fit", "Lower Match Quality", "Higher Match Quality"), col=c("blue","black", "black"), lty=c(1,NA, NA), pch=c(NA,1,1), cex=0.8, pt.cex=c(NA, 0.5, 1))
+  legend(5, 
+         400, 
+         legend=c("Best Fit", "Lower Match Quality", "Higher Match Quality"), 
+         col=c("blue","black", "black"), 
+         lty=c(1,NA, NA), 
+         pch=c(NA,1,1), 
+         cex=0.8, 
+         pt.cex=c(NA, 0.5, 1))
   lines(tDF$thresh, fitted(mean_mdl), col="blue")
   abline(h = 0, lty = 2)
 
+
+  }
+
+   newx <- seq(min(tDF$thresh), max(tDF$thresh), length.out=1000)
+
+  preds <- predict(mean_mdl, newdata=data.frame(thresh=newx, b=newx**2, c=newx**3), interval='confidence')
+  preds_std <- predict(std_mdl, newdata=data.frame(thresh=newx, b=newx**2, c=newx**3), interval='confidence')
     # #Overall impact 
   print(mean(unlist(tDF[tDF$thresh >=2.66 & tDF$thresh <=6,]["coef"][1])))
   upper_std = preds[ ,3] + 1.96*preds_std[1:1000]
@@ -196,11 +207,8 @@ QGI <- function(df,
   print(mean(unlist(tDF[tDF$thresh >=min(newx[which(lower_std>0)]) & tDF$thresh <=max(newx[which(lower_std>0)]),]["coef"][1])))
   print(paste('significant distance intervel: ',min(newx[which(lower_std>0)]),max(newx[which(lower_std>0)])))
   print(paste('plotted distance range: ',min(tDF$thresh),' ',max(tDF$thresh)))
-  }
 
- 
-
-  return(makeVisualization(tDF))
+  return(makeVisualization(tDF, preds, preds_std, newx, mean_mdl))
 
 }
 
