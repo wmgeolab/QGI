@@ -208,7 +208,10 @@ QGI <- function(df,
   print(paste('significant distance intervel: ',min(newx[which(lower_std>0)]),max(newx[which(lower_std>0)])))
   print(paste('plotted distance range: ',min(tDF$thresh),' ',max(tDF$thresh)))
 
-  return(makeVisualization(tDF, preds, preds_std, newx, mean_mdl))
+  retClass = list(figure = makeVisualization(tDF, preds, preds_std, newx, mean_mdl), models = tDF)
+  class(retClass) <- c("figure", "models")
+
+  return()
 
 }
 
