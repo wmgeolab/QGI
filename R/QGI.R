@@ -136,7 +136,7 @@ if(enforcedMinimumDistance <= 0.1)
                           discard=matchDiscardStrategy,
                           reestimate=pScoreReEstimate)
   
-  return(pscoreCalc)
+  #return(pscoreCalc)
 
   matched.df <- df[row.names(df)%in%row.names(match.data(pscoreCalc)),]
 
