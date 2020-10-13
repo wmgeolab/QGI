@@ -39,6 +39,7 @@ QGI <- function(df,
                 matchQualityWeighting = TRUE,
                 figFile = "Default",
                 verbosity = 0,
+                logFile = ""
                 cores = "Default") 
   {
   
@@ -52,7 +53,7 @@ QGI <- function(df,
       df <- na.omit(df)
     }
 
-  cl <- parallel::makeForkCluster(cores[1]-1) 
+  cl <- parallel::makeForkCluster(cores[1]-1, outfile=logFile) 
   doParallel::registerDoParallel(cl)
 
 if(enforcedMinimumDistance <= 0.1)
