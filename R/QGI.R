@@ -37,6 +37,7 @@ QGI <- function(df,
                 pScoreReEstimate = TRUE,
                 minN = 10,
                 matchQualityWeighting = TRUE,
+                figFile = "Default"
                 cores = "Default") 
   {
   
@@ -162,8 +163,22 @@ QGI <- function(df,
     std_mdl = lm(StdError ~ thresh + b + c, data = tDF)
   }
 
-  makeVisualization <- function (tDF, preds, preds_std, newx, mean_mdl){
-  par(mfrow = c(1, 1),     # 2x2 layout
+  
+  
+
+
+  
+
+  newx <- seq(min(tDF$thresh), max(tDF$thresh), length.out=1000)
+
+  preds <- predict(mean_mdl, newdata=data.frame(thresh=newx, b=newx**2, c=newx**3), interval='confidence')
+  preds_std <- predict(std_mdl, newdata=data.frame(thresh=newx, b=newx**2, c=newx**3), interval='confidence')
+
+#================= Viz
+if(figFile != "Default"){
+png(figFile, res=300)
+}
+par(mfrow = c(1, 1),     # 2x2 layout
     oma = c(2, 2, 0, 0), # two rows of text at the outer left and bottom margin
     mar = c(3, 3, 0, 0), # space for one row of text at ticks and to separate plots
     mgp = c(2, 1, 0),    # axis label at 2 rows distance, tick labels at 1 row
@@ -191,13 +206,9 @@ QGI <- function(df,
   lines(tDF$thresh, fitted(mean_mdl), col="blue")
   abline(h = 0, lty = 2)
 
+dev.off()
+#================= End Viz
 
-  }
-
-  newx <- seq(min(tDF$thresh), max(tDF$thresh), length.out=1000)
-
-  preds <- predict(mean_mdl, newdata=data.frame(thresh=newx, b=newx**2, c=newx**3), interval='confidence')
-  preds_std <- predict(std_mdl, newdata=data.frame(thresh=newx, b=newx**2, c=newx**3), interval='confidence')
 
   retClass = list(figure = makeVisualization(tDF, preds, preds_std, newx, mean_mdl), 
                   distanceModels = tDF)
