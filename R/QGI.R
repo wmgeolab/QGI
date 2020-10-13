@@ -95,7 +95,7 @@ if(enforcedMinimumDistance <= 0.1)
   df$Treatment[df$geogDistance <= (0 + dist_thresh)] <- 1
   df$Treatment[df$geogDistance >= (enforcedMinimumDistance + dist_thresh)] <- 0
   
-print(df$Treatment)
+
 
   #Count the number of treatment and control cases for output.
   df$Control = 0
@@ -124,6 +124,11 @@ print(df$Treatment)
   
   #Calculate our propensity scores using matchit
  
+  if(verbosity == 1)
+  {
+    print(table(df$Treatment))
+  }
+
   pscoreCalc <- matchit(f1, 
                           data=df[pVars], 
                           method=pScoreMethod, 
@@ -137,6 +142,7 @@ if(verbosity == 1)
 {
   print(paste("Match DF N: ", nrow(matched.df)))
   print(paste("Match DF T: ", sum(matched.df$Treatment)))
+  print(table(matched.df$Treatment))
   print(paste("Full DF T: ", treatCount))
 }
 
