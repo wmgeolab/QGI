@@ -194,24 +194,19 @@ QGI <- function(df,
 
   }
 
-   newx <- seq(min(tDF$thresh), max(tDF$thresh), length.out=1000)
+  newx <- seq(min(tDF$thresh), max(tDF$thresh), length.out=1000)
 
   preds <- predict(mean_mdl, newdata=data.frame(thresh=newx, b=newx**2, c=newx**3), interval='confidence')
   preds_std <- predict(std_mdl, newdata=data.frame(thresh=newx, b=newx**2, c=newx**3), interval='confidence')
-    # #Overall impact 
-  print(mean(unlist(tDF[tDF$thresh >=2.66 & tDF$thresh <=6,]["coef"][1])))
-  upper_std = preds[ ,3] + 1.96*preds_std[1:1000]
-  print(mean(unlist(tDF[tDF$thresh >=min(newx[which(upper_std<0)]) & tDF$thresh <=max(newx[which(upper_std<0)]),]["coef"][1])))
-  print(paste('significant distance intervel: ',min(newx[which(upper_std<0)]),max(newx[which(upper_std<0)])))
-  lower_std = preds[ ,2] - 1.96*preds_std[1:1000]
-  print(mean(unlist(tDF[tDF$thresh >=min(newx[which(lower_std>0)]) & tDF$thresh <=max(newx[which(lower_std>0)]),]["coef"][1])))
-  print(paste('significant distance intervel: ',min(newx[which(lower_std>0)]),max(newx[which(lower_std>0)])))
-  print(paste('plotted distance range: ',min(tDF$thresh),' ',max(tDF$thresh)))
 
-  retClass = list(figure = makeVisualization(tDF, preds, preds_std, newx, mean_mdl), models = tDF)
-  class(retClass) <- c("figure", "models")
+  retClass = list(figure = makeVisualization(tDF, preds, preds_std, newx, mean_mdl), 
+                  distanceModels = tDF, 
+                  propensityModel = pscore.Calc)
+  class(retClass) <- c("figure", 
+                       "distanceModels", 
+                       "propensityModel")
 
-  return()
+  return(retClass)
 
 }
 
