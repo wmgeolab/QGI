@@ -111,14 +111,14 @@ QGI <- function(df,
   f1 <- as.formula(paste("Treatment", paste(controlVars, collapse = " + "), sep = " ~ "))
   
   #Calculate our propensity scores using matchit
-  pscore.Calc <- matchit(f1, 
+  pscoreCalc <- matchit(f1, 
                           data=df[pVars], 
                           method=pScoreMethod, 
                           distance=pScoreDistance,
                           discard=matchDiscardStrategy,
                           reestimate=pScoreReEstimate)
   
-  matched.df <- match.data(pscore.Calc)
+  matched.df <- match.data(pscoreCalc)
     
   if(nrow(matched.df) > minN)
   {
@@ -130,7 +130,7 @@ QGI <- function(df,
     trtModel <- lm(f2, data=matched.df[aVars])
     
     
-    match_diff = abs(summary(pscore.Calc)$sum.matched[[1]][1] - summary(pscore.Calc)$sum.matched[[2]][1])
+    match_diff = abs(summary(pscoreCalc)$sum.matched[[1]][1] - summary(pscoreCalc)$sum.matched[[2]][1])
     
     return( list(i, dist_thresh, trtModel$coef["Treatment"][[1]], nrow(df), match_diff, summary(trtModel)$r.squared, coef(summary(trtModel))[2,4], coef(summary(trtModel))[2,2], nrow(matched.df), treatCount, controlCount))
   } 
@@ -201,7 +201,7 @@ QGI <- function(df,
 
   retClass = list(figure = makeVisualization(tDF, preds, preds_std, newx, mean_mdl), 
                   distanceModels = tDF, 
-                  propensityModel = pscore.Calc)
+                  propensityModel = pscoreCalc)
   class(retClass) <- c("figure", 
                        "distanceModels", 
                        "propensityModel")
