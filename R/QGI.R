@@ -38,7 +38,6 @@ QGI <- function(df,
                 minN = 10,
                 matchQualityWeighting = TRUE,
                 figFile = "Default",
-                yAxis = "Absolute",
                 cores = "Default") 
   {
   
@@ -198,10 +197,8 @@ par(mfrow = c(1, 1),     # 2x2 layout
   #Calculate mean outcome for later use
   meanOutcome = mean(df[[outcomeVar]], na.rm=TRUE)
 
-  plot(tDF$thresh, tDF$coef, cex = tDF$matchWeight, xlab="Distance (km)", ylab=paste(outcomeVar, " relative to mean of ", meanOutcome), ylim=c(min(0,ylim_lower), max(ylim_upper,0)))
+  plot(tDF$thresh, tDF$coef, cex = tDF$matchWeight, xlab="Distance (km)", ylab=paste(outcomeVar, " relative to mean of ", round(meanOutcome,3)), ylim=c(min(0,ylim_lower), max(ylim_upper,0)))
   
-
-
   polygon(c(rev(newx), newx), c(rev( preds[ ,3] + 1.96*preds_std[1:1000]),preds[ ,2] - 1.96*preds_std[1:1000]), col=rgb(0.2, 0.2, 0.25,0.25), border = NA)
   
   #polygon(c(rev(newx), newx), c(rev(preds[ ,3]), preds[ ,2]), col=rgb(0, 1, 0,0.25), border = NA)
