@@ -163,7 +163,7 @@ if(enforcedMinimumDistance <= 0.1)
   tDF$d = tDF$thresh**4
   
   tDF <- tDF[order(tDF$thresh),]
-
+  meanOutcome = mean(df[[outcomeVar]], na.rm=TRUE)
   if(matchQualityWeighting == TRUE)
   {
     if(yAxis == "Absolute")
