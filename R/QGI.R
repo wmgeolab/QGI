@@ -200,11 +200,9 @@ QGI <- function(df,
   preds_std <- predict(std_mdl, newdata=data.frame(thresh=newx, b=newx**2, c=newx**3), interval='confidence')
 
   retClass = list(figure = makeVisualization(tDF, preds, preds_std, newx, mean_mdl), 
-                  distanceModels = tDF, 
-                  propensityModel = pscoreCalc)
+                  distanceModels = tDF)
   class(retClass) <- c("figure", 
-                       "distanceModels", 
-                       "propensityModel")
+                       "distanceModels")
 
   return(retClass)
 
