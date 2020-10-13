@@ -206,16 +206,16 @@ par(mfrow = c(1, 1),     # 2x2 layout
   lines(newx, preds[ ,2] - 1.96*preds_std[1:1000], lty = 'dashed', col = 'black')
   lines(newx, preds[ ,3], lty = 'dashed', col = 'yellow')
   lines(newx, preds[ ,2], lty = 'dashed', col = 'yellow')
-  legend(5, 
-         400, 
-         legend=c("Best Fit", "Lower Match Quality", "Higher Match Quality"), 
-         col=c("blue","black", "black"), 
-         lty=c(1,NA, NA), 
-         pch=c(NA,1,1), 
-         cex=0.8, 
-         pt.cex=c(NA, 0.5, 1))
   lines(tDF$thresh, fitted(mean_mdl), col="blue")
   abline(h = 0, lty = 2)
+  legend(5, 
+        400, 
+        legend=c("Best Fit", "Lower Match Quality", "Higher Match Quality"), 
+        col=c("blue","black", "black"), 
+        lty=c(1,NA, NA), 
+        pch=c(NA,1,1), 
+        cex=0.8, 
+        pt.cex=c(NA, 0.5, 1))
 
 dev.off()
 #================= End Viz
