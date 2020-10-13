@@ -95,6 +95,8 @@ if(enforcedMinimumDistance <= 0.1)
   df$Treatment[df$geogDistance <= (0 + dist_thresh)] <- 1
   df$Treatment[df$geogDistance >= (enforcedMinimumDistance + dist_thresh)] <- 0
   
+print(df$Treatment)
+
   #Count the number of treatment and control cases for output.
   df$Control = 0
   df$Control[df$Treatment == 0] <- 1
