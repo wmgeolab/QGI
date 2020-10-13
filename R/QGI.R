@@ -171,12 +171,6 @@ if(enforcedMinimumDistance <= 0.1)
     std_mdl = lm(StdError ~ thresh + b + c, data = tDF)
   }
 
-  
-  
-
-
-  
-
   newx <- seq(min(tDF$thresh), max(tDF$thresh), length.out=1000)
 
   preds <- predict(mean_mdl, newdata=data.frame(thresh=newx, b=newx**2, c=newx**3), interval='confidence')
@@ -222,9 +216,14 @@ dev.off()
 
 
   retClass = list(figure = figFile, 
-                  distanceModels = tDF)
+                  distanceModels = tDF,
+                  distanceCoefEstimates = preds,
+                  distanceStderrorEstiamtes = preds_std)
   class(retClass) <- c("figure", 
-                       "distanceModels")
+                       "distanceModels",
+                       "distanceCoefEstimates",
+                       "distanceStderrorEstimates"
+                       )
 
   return(retClass)
 
