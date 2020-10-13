@@ -134,6 +134,8 @@ if(enforcedMinimumDistance <= 0.1)
 if(verbosity == 1)
 {
   print(paste("Match DF N: ", nrow(matched.df)))
+  print(paste("Match DF T: ", sum(matched.df$Treatment)))
+  print(paste("Full DF T: ", treatCount))
 }
 
 
