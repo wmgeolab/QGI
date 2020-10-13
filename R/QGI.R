@@ -176,7 +176,7 @@ QGI <- function(df,
 
 #================= Viz
 if(figFile != "Default"){
-png(figFile, res=300)
+png(figFile)
 }
 par(mfrow = c(1, 1),     # 2x2 layout
     oma = c(2, 2, 0, 0), # two rows of text at the outer left and bottom margin
