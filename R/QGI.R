@@ -120,6 +120,11 @@ if(enforcedMinimumDistance <= 0.1)
   f1 <- as.formula(paste("Treatment", paste(controlVars, collapse = " + "), sep = " ~ "))
   
   #Calculate our propensity scores using matchit
+  if(verbosity == 1)
+  {
+    print("====================")
+    print("MatchIt Running...")
+  }
   pscoreCalc <- matchit(f1, 
                           data=df[pVars], 
                           method=pScoreMethod, 
