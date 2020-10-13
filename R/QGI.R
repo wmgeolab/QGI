@@ -156,7 +156,7 @@ if(verbosity == 1)
     if(verbosity == 1)
     {
       print(outcomeVar)
-      print(nrow(df["outcomeVar"]))
+      print(nrow(df[outcomeVar]))
     }
     df["outcome"] <- df[outcomeVar]
     f2 <- as.formula(paste("outcome", paste(c("Treatment", controlVars), collapse = " + "), sep = " ~ "))
