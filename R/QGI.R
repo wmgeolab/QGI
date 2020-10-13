@@ -29,7 +29,7 @@ QGI <- function(df,
                 lowerDistBound=0.0, 
                 upperDistBound="Default", 
                 maximum_match_diff=0.9, 
-                enforcedMinimumDistance=5,
+                enforcedMinimumDistance=0.5,
                 strategyNA = "Omit",
                 pScoreMethod = "linear",
                 pScoreDistance = "logit",
@@ -38,6 +38,7 @@ QGI <- function(df,
                 minN = 10,
                 matchQualityWeighting = TRUE,
                 figFile = "Default",
+                yAxis = "Absolute",
                 cores = "Default") 
   {
   
@@ -53,6 +54,12 @@ QGI <- function(df,
 
   cl <- parallel::makeForkCluster(cores[1]-1) 
   doParallel::registerDoParallel(cl)
+
+if(enforcedMinimumDistance <= 0.1)
+{
+  print("WARNING: Small enforced minimum distance values can result in duplicate cases in treatment and control sets, depending on the resolution of your data.  Use with extreme caution.")
+}  
+
 
   if(upperDistBound == "Default")
     {
@@ -94,6 +101,9 @@ QGI <- function(df,
 
   treatCount = sum(df$Treatment)
   controlCount = sum(df$Control)
+
+  #Calculate mean outcome for later use
+  meanOutcome = mean(df[[outcomeVar]], na.rm=TRUE)
 
   #Remove any cases that were not assigned to treatment or control
   #Can happen if there are data errors (i.e., NAs in distance)
@@ -156,11 +166,27 @@ QGI <- function(df,
 
   if(matchQualityWeighting == TRUE)
   {
+    if(yAxis == "Absolute")
+    {
     mean_mdl = lm(coef ~ thresh + b + c, data = tDF, weights =matchWeight)
     std_mdl = lm(StdError ~ thresh + b + c, data = tDF, weights =matchWeight)
+    }
+    if(yAxis == "Percent")
+    {
+    mean_mdl = lm(coef/meanOutcome*100 ~ thresh + b + c, data = tDF, weights =matchWeight)
+    std_mdl = lm(StdError/meanOutcome*100 ~ thresh + b + c, data = tDF, weights =matchWeight)
+    }
   } else {
+    if(yAxis == "Absolute")
+    {
     mean_mdl = lm(coef ~ thresh + b + c, data = tDF)
     std_mdl = lm(StdError ~ thresh + b + c, data = tDF)
+    }
+    if(yAxis == "Percent")
+    {
+    mean_mdl = lm(coef/meanOutcome*100 ~ thresh + b + c, data = tDF)
+    std_mdl = lm(StdError/meanOutcome*100 ~ thresh + b + c, data = tDF)
+    }
   }
 
   
@@ -185,16 +211,15 @@ par(mfrow = c(1, 1),     # 2x2 layout
     xpd = FALSE)   
   ylim_upper <- max(tDF$coef + 1.96*tDF$StdError, na.rm = TRUE)
   ylim_lower <- min(tDF$coef - 1.96*tDF$StdError, na.rm = TRUE)
-  plot(tDF$thresh, tDF$coef, cex = tDF$size, xlab="Distance (km)", ylab=outcomeVar, ylim=c(min(0,ylim_lower), max(ylim_upper,0)))
 
-
+  plot(tDF$thresh, tDF$coef, cex = tDF$matchWeight, xlab="Distance (km)", ylab=outcomeVar, ylim=c(min(0,ylim_lower), max(ylim_upper,0)))
   polygon(c(rev(newx), newx), c(rev( preds[ ,3] + 1.96*preds_std[1:1000]),preds[ ,2] - 1.96*preds_std[1:1000]), col=rgb(0.2, 0.2, 0.25,0.25), border = NA)
-  
-  #polygon(c(rev(newx), newx), c(rev(preds[ ,3]), preds[ ,2]), col=rgb(0, 1, 0,0.25), border = NA)
   lines(newx, preds[ ,3] + 1.96*preds_std[1:1000], lty = 'dashed', col = 'black')
   lines(newx, preds[ ,2] - 1.96*preds_std[1:1000], lty = 'dashed', col = 'black')
   lines(newx, preds[ ,3], lty = 'dashed', col = 'yellow')
   lines(newx, preds[ ,2], lty = 'dashed', col = 'yellow')
+  
+
   legend(5, 
          400, 
          legend=c("Best Fit", "Lower Match Quality", "Higher Match Quality"), 
@@ -203,7 +228,13 @@ par(mfrow = c(1, 1),     # 2x2 layout
          pch=c(NA,1,1), 
          cex=0.8, 
          pt.cex=c(NA, 0.5, 1))
+
+  
+
+
   lines(tDF$thresh, fitted(mean_mdl), col="blue")
+  
+  
   abline(h = 0, lty = 2)
 
 dev.off()
