@@ -138,9 +138,7 @@ if(enforcedMinimumDistance <= 0.1)
 if(verbosity == 1)
 {
   print("=============================")
-  print(matched.df)
-  print("=============================")
-  print(pscoreCalc)
+  print(nrow(matched.df))
   print("=============================")
   print(f1)
 }
@@ -155,7 +153,10 @@ if(verbosity == 1)
     
     trtModel <- lm(f2, data=matched.df[aVars])
     
-    
+    if(verbosity == 1)
+    {
+      print(trtModel)
+    }
     match_diff = abs(summary(pscoreCalc)$sum.matched[[1]][1] - summary(pscoreCalc)$sum.matched[[2]][1])
     
     return( list(i, dist_thresh, trtModel$coef["Treatment"][[1]], nrow(df), match_diff, summary(trtModel)$r.squared, coef(summary(trtModel))[2,4], coef(summary(trtModel))[2,2], nrow(matched.df), treatCount, controlCount))
@@ -178,11 +179,6 @@ if(verbosity == 1)
   tDF$d = tDF$thresh**4
   
   tDF <- tDF[order(tDF$thresh),]
-
-  if(verbosity == 1)
-  {
-    print(tDF)
-  }
 
   if(matchQualityWeighting == TRUE)
   {
