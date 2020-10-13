@@ -121,11 +121,7 @@ if(enforcedMinimumDistance <= 0.1)
   f1 <- as.formula(paste("Treatment", paste(controlVars, collapse = " + "), sep = " ~ "))
   
   #Calculate our propensity scores using matchit
-  if(verbosity == 1)
-  {
-    print("====================")
-    print("MatchIt Running...")
-  }
+ 
   pscoreCalc <- matchit(f1, 
                           data=df[pVars], 
                           method=pScoreMethod, 
@@ -137,10 +133,7 @@ if(enforcedMinimumDistance <= 0.1)
   
 if(verbosity == 1)
 {
-  print("=============================")
-  print(nrow(matched.df))
-  print("=============================")
-  print(f1)
+  print(paste("Match DF N: ", nrow(matched.df)))
 }
 
 
@@ -155,7 +148,7 @@ if(verbosity == 1)
     
     if(verbosity == 1)
     {
-      print(trtModel)
+      print(trtModel$coef)
     }
     match_diff = abs(summary(pscoreCalc)$sum.matched[[1]][1] - summary(pscoreCalc)$sum.matched[[2]][1])
     
