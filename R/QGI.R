@@ -38,6 +38,7 @@ QGI <- function(df,
                 minN = 10,
                 matchQualityWeighting = TRUE,
                 figFile = "Default",
+                verbosity = 0,
                 cores = "Default") 
   {
   
@@ -59,7 +60,10 @@ if(enforcedMinimumDistance <= 0.1)
   print("WARNING: Small enforced minimum distance values can result in duplicate cases in treatment and control sets, depending on the resolution of your data.  Use with extreme caution.")
 }  
 
-
+if(verbosity == 1)
+{
+  print(df)
+}
   if(upperDistBound == "Default")
     {
     upperDistBound = as.numeric(summary(df[,distanceCol])[3])
@@ -128,7 +132,18 @@ if(enforcedMinimumDistance <= 0.1)
                           reestimate=pScoreReEstimate)
   
   matched.df <- match.data(pscoreCalc)
-    
+  
+if(verbosity == 1)
+{
+  print("=============================")
+  print(matched.df)
+  print("=============================")
+  print(pscoreCalc)
+  print("=============================")
+  print(f1)
+}
+
+
   if(nrow(matched.df) > minN)
   {
     #construct outcome modeling formula
@@ -218,7 +233,7 @@ dev.off()
   retClass = list(figure = figFile, 
                   distanceModels = tDF,
                   distanceCoefEstimates = preds,
-                  distanceStderrorEstiamtes = preds_std)
+                  distanceStderrorEstimates = preds_std)
   class(retClass) <- c("figure", 
                        "distanceModels",
                        "distanceCoefEstimates",
