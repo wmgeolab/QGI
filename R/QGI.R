@@ -162,11 +162,15 @@ if(verbosity == 1)
     }
     match_diff = abs(summary(pscoreCalc)$sum.matched[[1]][1] - summary(pscoreCalc)$sum.matched[[2]][1])
     
-    return( list(i, dist_thresh, trtModel$coef["Treatment"][[1]], nrow(df), match_diff, summary(trtModel)$r.squared, coef(summary(trtModel))[2,4], coef(summary(trtModel))[2,2], nrow(matched.df), treatCount, controlCount))
+    return(matched.df[aVars])
+
+    #return( list(i, dist_thresh, trtModel$coef["Treatment"][[1]], nrow(df), match_diff, summary(trtModel)$r.squared, coef(summary(trtModel))[2,4], coef(summary(trtModel))[2,2], nrow(matched.df), treatCount, controlCount))
+    
   } 
 
   }
 
+  return(mc)
 
   #Create visualizations and outputs
   tDF <- data.frame(t(matrix(unlist(mc), nrow=11, byrow=T)))
