@@ -138,7 +138,7 @@ if(enforcedMinimumDistance <= 0.1)
   
   return(pscoreCalc)
 
-  matched.df <- match.data(pscoreCalc)
+  matched.df <- df[row.names(df)%in%row.names(match.data(pscoreCalc)),]
 
   
   
@@ -160,8 +160,8 @@ if(verbosity == 1)
     
 
     f2 <- as.formula(paste("outcome", paste(c("Treatment", controlVars), collapse = " + "), sep = " ~ "))
-    matched.df["Treatment"] = matched.df$Treatment
-    trtModel <- lm(f2, data=matched.df[aVars])
+
+    trtModel <- lm(f2, data=df[aVars])
     
     if(verbosity == 1)
     {
