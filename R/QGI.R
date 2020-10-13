@@ -178,6 +178,11 @@ if(verbosity == 1)
   
   tDF <- tDF[order(tDF$thresh),]
 
+  if(verbosity == 1)
+  {
+    print(tDF)
+  }
+
   if(matchQualityWeighting == TRUE)
   {
     mean_mdl = lm(coef ~ thresh + b + c, data = tDF, weights =matchWeight)
