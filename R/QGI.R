@@ -48,9 +48,13 @@ QGI <- function(df,
       cores=parallel::detectCores()
     }
 
-  if(strategyNA == "Omit")
+  if(strategyNA == "OmitAll")
     {
       df <- na.omit(df)
+    }
+   if(strategyNA == "OmitControl")
+    {
+      df <- na.omit(df[controlVars])
     }
 
   cl <- parallel::makeForkCluster(cores[1]-1, outfile=logFile) 
