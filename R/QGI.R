@@ -40,6 +40,7 @@ QGI <- function(df,
                 figFile = "Default",
                 verbosity = 0,
                 logFile = "",
+                modelType = "thirdOrder"
                 cores = "Default") 
   {
   
@@ -189,26 +190,27 @@ if(verbosity == 1)
   # #Scale for data visualization and (optionally) weighting
   tDF$matchWeight = 1 - ((tDF$match_diff - min(tDF$match_diff)) / (max(tDF$match_diff) - min(tDF$match_diff)))
 
+
   # #Third-order polynomial for the distance-decay
   tDF$b = tDF$thresh**2
   tDF$c = tDF$thresh**3
   tDF$d = tDF$thresh**4
-  
+
   tDF <- tDF[order(tDF$thresh),]
 
   if(matchQualityWeighting == TRUE)
   {
-    mean_mdl = lm(coef ~ thresh + b + c, data = tDF, weights =matchWeight)
-    std_mdl = lm(StdError ~ thresh + b + c, data = tDF, weights =matchWeight)
+    mean_mdl = lm(coef ~ thresh + b + c + d, data = tDF, weights =matchWeight)
+    std_mdl = lm(StdError ~ thresh + b + c + d, data = tDF, weights =matchWeight)
   } else {
-    mean_mdl = lm(coef ~ thresh + b + c, data = tDF)
-    std_mdl = lm(StdError ~ thresh + b + c, data = tDF)
+    mean_mdl = lm(coef ~ thresh + b + c + d, data = tDF)
+    std_mdl = lm(StdError ~ thresh + b + c + d, data = tDF)
   }
 
   newx <- seq(min(tDF$thresh), max(tDF$thresh), length.out=1000)
 
-  preds <- predict(mean_mdl, newdata=data.frame(thresh=newx, b=newx**2, c=newx**3), interval='confidence')
-  preds_std <- predict(std_mdl, newdata=data.frame(thresh=newx, b=newx**2, c=newx**3), interval='confidence')
+  preds <- predict(mean_mdl, newdata=data.frame(thresh=newx, b=newx**2, c=newx**3, d=newx**4), interval='confidence')
+  preds_std <- predict(std_mdl, newdata=data.frame(thresh=newx, b=newx**2, c=newx**3, d=newx**4), interval='confidence')
 
 #================= Viz
 if(figFile != "Default"){
@@ -225,7 +227,7 @@ par(mfrow = c(1, 1),     # 2x2 layout
   #Calculate mean outcome for later use
   meanOutcome = mean(df[[outcomeVar]], na.rm=TRUE)
 
-  plot(tDF$thresh, tDF$coef, cex = tDF$matchWeight, xlab="Distance (km)", ylab=paste(outcomeVar, " relative to mean of ", round(meanOutcome,3)), ylim=c(min(0,ylim_lower), max(ylim_upper,0)))
+  plot(tDF$thresh, tDF$coef, cex = tDF$matchWeight, xlab="Distance (km)", ylab=paste("Impact of activities on ", outcomeVar, " relative to mean of ", round(meanOutcome,3)), ylim=c(min(0,ylim_lower), max(ylim_upper,0)))
   
   polygon(c(rev(newx), newx), c(rev( preds[ ,3] + 1.96*preds_std[1:1000]),preds[ ,2] - 1.96*preds_std[1:1000]), col=rgb(0.2, 0.2, 0.25,0.25), border = NA)
   
