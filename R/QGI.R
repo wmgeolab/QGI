@@ -198,6 +198,8 @@ if(verbosity == 1)
 
   tDF <- tDF[order(tDF$thresh),]
 
+if(modelType == "fourthOrder")
+{
   if(matchQualityWeighting == TRUE)
   {
     mean_mdl = lm(coef ~ thresh + b + c + d, data = tDF, weights =matchWeight)
@@ -211,7 +213,41 @@ if(verbosity == 1)
 
   preds <- predict(mean_mdl, newdata=data.frame(thresh=newx, b=newx**2, c=newx**3, d=newx**4), interval='confidence')
   preds_std <- predict(std_mdl, newdata=data.frame(thresh=newx, b=newx**2, c=newx**3, d=newx**4), interval='confidence')
+}
 
+if(modelType == "thirdOrder")
+{
+  if(matchQualityWeighting == TRUE)
+  {
+    mean_mdl = lm(coef ~ thresh + b + c, data = tDF, weights =matchWeight)
+    std_mdl = lm(StdError ~ thresh + b + c, data = tDF, weights =matchWeight)
+  } else {
+    mean_mdl = lm(coef ~ thresh + b + c, data = tDF)
+    std_mdl = lm(StdError ~ thresh + b + c, data = tDF)
+  }
+
+  newx <- seq(min(tDF$thresh), max(tDF$thresh), length.out=1000)
+
+  preds <- predict(mean_mdl, newdata=data.frame(thresh=newx, b=newx**2, c=newx**3), interval='confidence')
+  preds_std <- predict(std_mdl, newdata=data.frame(thresh=newx, b=newx**2, c=newx**3), interval='confidence')
+}
+
+if(modelType == "secondOrder")
+{
+  if(matchQualityWeighting == TRUE)
+  {
+    mean_mdl = lm(coef ~ thresh + b, data = tDF, weights =matchWeight)
+    std_mdl = lm(StdError ~ thresh + b, data = tDF, weights =matchWeight)
+  } else {
+    mean_mdl = lm(coef ~ thresh + b, data = tDF)
+    std_mdl = lm(StdError ~ thresh + b, data = tDF)
+  }
+
+  newx <- seq(min(tDF$thresh), max(tDF$thresh), length.out=1000)
+
+  preds <- predict(mean_mdl, newdata=data.frame(thresh=newx, b=newx**2), interval='confidence')
+  preds_std <- predict(std_mdl, newdata=data.frame(thresh=newx, b=newx**2), interval='confidence')
+}
 #================= Viz
 if(figFile != "Default"){
 png(figFile)
