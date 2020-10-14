@@ -40,7 +40,7 @@ QGI <- function(df,
                 figFile = "Default",
                 verbosity = 0,
                 logFile = "",
-                modelType = "thirdOrder"
+                modelType = "thirdOrder",
                 cores = "Default") 
   {
   
