@@ -54,7 +54,7 @@ QGI <- function(df,
     }
    if(strategyNA == "OmitControl")
     {
-      df <- na.omit(df[controlVars])
+      df <- na.omit(df[c(controlVars, distanceCol, outcomeVar)])
     }
 
   cl <- parallel::makeForkCluster(cores[1]-1, outfile=logFile) 
