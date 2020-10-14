@@ -290,11 +290,13 @@ dev.off()
   retClass = list(figure = figFile, 
                   distanceModels = tDF,
                   distanceCoefEstimates = preds,
-                  distanceStderrorEstimates = preds_std)
+                  distanceStderrorEstimates = preds_std,
+                  coefModel = mean_mdl)
   class(retClass) <- c("figure", 
                        "distanceModels",
                        "distanceCoefEstimates",
-                       "distanceStderrorEstimates"
+                       "distanceStderrorEstimates",
+                       "distanceDecayCoefModel"
                        )
 
   return(retClass)
